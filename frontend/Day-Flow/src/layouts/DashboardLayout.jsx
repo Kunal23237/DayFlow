@@ -47,7 +47,8 @@ const DashboardLayout = () => {
     const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
     // Determine base path based on role or current URL to support aliases
-    const isAdmin = user?.role === 'admin';
+    // Determine base path based on role or current URL to support aliases
+    const isAdmin = ['admin', 'hr'].includes(user?.role?.toLowerCase());
     const basePath = isAdmin ? '/admin-dashboard' : '/employee-dashboard';
 
     const employeeNavItems = [
