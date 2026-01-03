@@ -7,9 +7,70 @@ import { Clock, Calendar as CalendarIcon, MapPin, UserCheck, UserX } from 'lucid
 
 const EmployeeAttendance = () => {
     const [status, setStatus] = useState('out'); // 'in' or 'out'
+    const [loadingLocation, setLoadingLocation] = useState(false);
+    const [locationError, setLocationError] = useState(null);
 
-    const handleCheckInOut = () => {
-        setStatus(status === 'in' ? 'out' : 'in');
+    // Mock Office Coordinates (Example: New Delhi) - Replace with actual office coords
+    const OFFICE_LAT = 28.6139;
+    const OFFICE_LNG = 77.2090;
+    const ALLOWED_RADIUS_KM = 0.5; // 500 meters
+
+    const calculateDistance = (lat1, lon1, lat2, lon2) => {
+        const R = 6371; // Radius of the earth in km
+        const dLat = deg2rad(lat2 - lat1);
+        const dLon = deg2rad(lon2 - lon1);
+        const a =
+            Math.sin(dLat / 2) * Math.sin(dLat / 2) +
+            Math.cos(deg2rad(lat1)) * Math.cos(deg2rad(lat2)) *
+            Math.sin(dLon / 2) * Math.sin(dLon / 2);
+        const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
+        const d = R * c; // Distance in km
+        return d;
+    };
+
+    const deg2rad = (deg) => {
+        return deg * (Math.PI / 180);
+    };
+
+    const handleCheckIn = () => {
+        setLoadingLocation(true);
+        setLocationError(null);
+
+        if (!navigator.geolocation) {
+            setLocationError("Geolocation is not supported by your browser.");
+            setLoadingLocation(false);
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+            (position) => {
+                const { latitude, longitude } = position.coords;
+                // For now, we are just logging it. 
+                // To enable strict Geofencing, uncomment the logic below:
+                
+                /*
+                const distance = calculateDistance(latitude, longitude, OFFICE_LAT, OFFICE_LNG);
+                if (distance > ALLOWED_RADIUS_KM) {
+                    setLocationError(`You are too far from the office (${distance.toFixed(2)}km away).`);
+                    setLoadingLocation(false);
+                    return;
+                }
+                */
+
+                // Assuming success for demo purposes or if distance check passes
+                setStatus('in');
+                setLoadingLocation(false);
+                console.log(`Checked in at: ${latitude}, ${longitude}`);
+            },
+            (error) => {
+                setLocationError("Unable to retrieve your location. Please allow location access.");
+                setLoadingLocation(false);
+            }
+        );
+    };
+
+    const handleCheckOut = () => {
+        setStatus('out');
     };
 
     return (
@@ -23,29 +84,48 @@ const EmployeeAttendance = () => {
                         <CardDescription>{new Date().toLocaleDateString(undefined, { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}</CardDescription>
                     </CardHeader>
                     <CardContent className="flex flex-col items-center gap-6">
-                        <div className={`h-40 w-40 rounded-full flex items-center justify-center border-4 ${status === 'in' ? 'border-green-500 bg-green-500/10' : 'border-slate-300 bg-slate-100 dark:bg-slate-800'} transition-all duration-500`}>
-                            <div className="text-center">
-                                <Clock className={`h-10 w-10 mx-auto mb-2 ${status === 'in' ? 'text-green-600' : 'text-slate-400'}`} />
-                                <span className={`text-xl font-bold ${status === 'in' ? 'text-green-700' : 'text-slate-500'}`}>
-                                    {status === 'in' ? 'Checked In' : 'Checked Out'}
-                                </span>
+                        
+                        {/* Attendance Percentage Display - Replacing Clock */}
+                        <div className="flex flex-col items-center justify-center p-6 bg-white dark:bg-slate-900 rounded-xl shadow-sm border border-slate-200 dark:border-slate-800 w-full">
+                            <span className="text-sm font-medium text-muted-foreground uppercase tracking-wider">Attendance Rate</span>
+                            <div className="flex items-baseline gap-1 mt-2">
+                                <span className="text-5xl font-extrabold text-primary">92%</span>
+                                <span className="text-sm text-green-600 font-semibold mb-1">THIS MONTH</span>
                             </div>
+                            <div className="w-full bg-slate-100 dark:bg-slate-800 h-2 rounded-full mt-4 overflow-hidden">
+                                <div className="bg-primary h-full rounded-full" style={{ width: '92%' }}></div>
+                            </div>
+                            <p className="text-xs text-muted-foreground mt-3 text-center">
+                                You have been present for <span className="font-medium text-foreground">22 days</span> out of 24 working days.
+                            </p>
+                        </div>
+
+                        {/* Status Message */}
+                        <div className="text-center">
+                             <div className={`text-lg font-medium ${status === 'in' ? 'text-green-600' : 'text-slate-500'}`}>
+                                Currently: {status === 'in' ? 'Checked In' : 'Checked Out'}
+                            </div>
+                            {locationError && (
+                                <div className="text-sm text-red-500 mt-2 bg-red-50 p-2 rounded border border-red-100">
+                                    {locationError}
+                                </div>
+                            )}
                         </div>
 
                         <div className="flex gap-4 w-full">
                             <Button
                                 size="lg"
                                 className={`flex-1 ${status === 'out' ? 'bg-green-600 hover:bg-green-700' : 'bg-slate-300 pointer-events-none'}`}
-                                onClick={() => setStatus('in')}
-                                disabled={status === 'in'}
+                                onClick={handleCheckIn}
+                                disabled={status === 'in' || loadingLocation}
                             >
-                                Check In
+                                {loadingLocation ? 'Locating...' : 'Check In'}
                             </Button>
                             <Button
                                 size="lg"
                                 variant="destructive"
                                 className="flex-1"
-                                onClick={() => setStatus('out')}
+                                onClick={handleCheckOut}
                                 disabled={status === 'out'}
                             >
                                 Check Out
@@ -53,7 +133,7 @@ const EmployeeAttendance = () => {
                         </div>
                         <div className="flex items-center gap-2 text-xs text-muted-foreground">
                             <MapPin className="h-3 w-3" />
-                            <span>Location: Office HQ (Detected)</span>
+                            <span>Location Check Required</span>
                         </div>
                     </CardContent>
                 </Card>
