@@ -73,6 +73,7 @@ const leaveSchema = new mongoose.Schema(
 );
 
 // Calculate number of days before saving
+// Calculate number of days before saving
 leaveSchema.pre('save', function (next) {
     if (this.startDate && this.endDate) {
         const diffTime = Math.abs(this.endDate - this.startDate);
@@ -84,15 +85,27 @@ leaveSchema.pre('save', function (next) {
             this.numberOfDays = diffDays;
         }
     }
-    next();
+    // Mongoose hooks without async/await usually require next(), but in this context 
+    // simply calling it seems to fail if not defined properly in some versions.
+    // However, the safe fix as per previous User model is to just check if next exists or standard callback.
+    // Better: Mongoose middleware usually supports simple sync execution if defined synchronously.
+    // But let's verify if 'next' is actually passed. 
+    // The error says "next is not a function", meaning it's undefined.
+    // This happens if we use async signature or incorrect version assumptions.
+    // Let's force it to be safe.
+    if (typeof next === 'function') {
+        next();
+    }
 });
 
 // Validate end date is after start date
 leaveSchema.pre('save', function (next) {
     if (this.endDate < this.startDate) {
-        next(new Error('End date must be after start date'));
+        const err = new Error('End date must be after start date');
+        if (typeof next === 'function') return next(err);
+        throw err;
     }
-    next();
+    if (typeof next === 'function') next();
 });
 
 // Index for faster queries
@@ -108,7 +121,7 @@ leaveSchema.statics.getLeaveStats = async function (employeeId, year) {
     return await this.aggregate([
         {
             $match: {
-                employee: mongoose.Types.ObjectId(employeeId),
+                employee: new mongoose.Types.ObjectId(employeeId),
                 status: 'Approved',
                 startDate: { $gte: startDate, $lte: endDate },
             },

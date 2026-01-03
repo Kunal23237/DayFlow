@@ -45,6 +45,7 @@ const applyLeave = asyncHandler(async (req, res) => {
         leaveType,
         startDate: start.toDate(),
         endDate: end.toDate(),
+        numberOfDays, // Pass the calculated number of days
         reason,
         isHalfDay: isHalfDay || false,
         halfDaySession,

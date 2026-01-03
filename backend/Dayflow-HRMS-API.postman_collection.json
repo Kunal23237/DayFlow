@@ -1,20 +1,22 @@
 {
     "info": {
-        "_postman_id": "6d73e1f8-9b85-4fd4-854a-4b6fde02541c",
-        "name": "Dayflow HRMS API",
-        "description": "Complete API collection for Dayflow HRMS",
+        "_postman_id": "b396b92d-c692-4761-8141-40a9068bf715",
+        "name": "Dayflow HRMS API (Complete)",
+        "description": "A comprehensive API collection for Dayflow HRMS. Includes generic auth token handling and detailed examples for all roles.",
         "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
     },
     "variable": [
         {
             "key": "baseUrl",
             "value": "http://localhost:5000/api",
-            "type": "string"
+            "type": "string",
+            "description": "Base URL for the API"
         },
         {
             "key": "token",
             "value": "",
-            "type": "string"
+            "type": "string",
+            "description": "JWT Token for authentication (Auto-updated by Sign In)"
         }
     ],
     "auth": {
@@ -29,7 +31,7 @@
     },
     "item": [
         {
-            "name": "Auth",
+            "name": "1. Auth",
             "item": [
                 {
                     "name": "Sign In",
@@ -46,6 +48,7 @@
                                 "signin"
                             ]
                         },
+                        "description": "\n**Step 1: Sign In**\nUse this request to log in. \n- **Employee**: Use valid employee credentials.\n- **Admin**: Use valid admin credentials.\n\n**Note**: The script in the 'Tests' tab automatically saves the received 'token' to the collection variables.\n",
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"email\": \"admin@dayflow.com\",\n    \"password\": \"password123\"\n}",
@@ -56,8 +59,25 @@
                             }
                         }
                     },
-                    "response": [],
                     "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        },
                         {
                             "listen": "test",
                             "script": {
@@ -66,12 +86,16 @@
                                     "if (jsonData.token) {",
                                     "    pm.collectionVariables.set(\"token\", jsonData.token);",
                                     "    console.log(\"Token updated successfully\");",
+                                    "    pm.test(\"Token captured\", function () {",
+                                    "        pm.expect(pm.collectionVariables.get(\"token\")).to.not.be.empty;",
+                                    "    });",
                                     "}"
                                 ],
                                 "type": "text/javascript"
                             }
                         }
-                    ]
+                    ],
+                    "response": []
                 },
                 {
                     "name": "Sign Up",
@@ -88,9 +112,10 @@
                                 "signup"
                             ]
                         },
+                        "description": "Register a new user account. Required fields: name, email, password.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"name\": \"John Doe\",\n    \"email\": \"john@example.com\",\n    \"password\": \"password123\",\n    \"role\": \"employee\"\n}",
+                            "raw": "{\n    \"name\": \"New User\",\n    \"email\": \"newuser@dayflow.com\",\n    \"password\": \"password123\",\n    \"role\": \"Employee\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -98,10 +123,30 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Get Me",
+                    "name": "Get Current User (Me)",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -114,8 +159,29 @@
                                 "auth",
                                 "me"
                             ]
-                        }
+                        },
+                        "description": "Get details of the currently logged-in user using the Bearer token."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -133,9 +199,10 @@
                                 "forgot-password"
                             ]
                         },
+                        "description": "Initiate password reset flow.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"email\": \"john@example.com\"\n}",
+                            "raw": "{\n    \"email\": \"user@dayflow.com\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -143,25 +210,26 @@
                             }
                         }
                     },
-                    "response": []
-                },
-                {
-                    "name": "Verify Email",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/auth/verify-email/:token",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "auth",
-                                "verify-email",
-                                ":token"
-                            ]
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
                         }
-                    },
+                    ],
                     "response": []
                 },
                 {
@@ -180,6 +248,7 @@
                                 ":token"
                             ]
                         },
+                        "description": "Reset password using the token received via email. Replace :token in URL.",
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"password\": \"newpassword123\"\n}",
@@ -190,13 +259,33 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Auth"
+            "description": "Authentication endpoints. Start here."
         },
         {
-            "name": "Employees",
+            "name": "2. Employees",
             "item": [
                 {
                     "name": "My Profile",
@@ -212,8 +301,29 @@
                                 "employees",
                                 "profile"
                             ]
-                        }
+                        },
+                        "description": "Get full profile details of the logged-in employee."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -231,9 +341,10 @@
                                 "profile"
                             ]
                         },
+                        "description": "Update personal details. Note: You cannot update core job details here.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"phoneNumber\": \"1234567890\",\n    \"address\": \"123 Main St\"\n}",
+                            "raw": "{\n    \"phoneNumber\": \"9876543210\",\n    \"address\": {\n        \"street\": \"456 Developer Lane\",\n        \"city\": \"Tech City\",\n        \"state\": \"CA\",\n        \"country\": \"USA\",\n        \"zipCode\": \"90001\"\n    },\n    \"emergencyContact\": {\n        \"name\": \"Jane Doe\",\n        \"relationship\": \"Spouse\",\n        \"phone\": \"1112223333\"\n    }\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -241,59 +352,64 @@
                             }
                         }
                     },
-                    "response": []
-                },
-                {
-                    "name": "Upload Profile Picture",
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/employees/upload-picture",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "employees",
-                                "upload-picture"
-                            ]
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
                         }
-                    },
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Upload Document",
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/employees/upload-document",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "employees",
-                                "upload-document"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get All Employees (Admin/HR)",
+                    "name": "Get All Employees (Admin)",
                     "request": {
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/employees",
+                            "raw": "{{baseUrl}}/employees?page=1&limit=10",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
-                                "employees"
+                                "employees?page=1&limit=10"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: List all employees with pagination."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -310,12 +426,33 @@
                                 "employees",
                                 "departments"
                             ]
-                        }
+                        },
+                        "description": "Get list of all distinct departments."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Get Employee By ID (Admin/HR)",
+                    "name": "Get Employee By ID",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -328,12 +465,33 @@
                                 "employees",
                                 ":id"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: Get a specific employee's details."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Update Employee (Admin/HR)",
+                    "name": "Update Employee (Admin)",
                     "request": {
                         "method": "PUT",
                         "header": [],
@@ -347,9 +505,10 @@
                                 ":id"
                             ]
                         },
+                        "description": "HR/Admin: Update job details, role, etc.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"role\": \"manager\",\n    \"department\": \"IT\"\n}",
+                            "raw": "{\n    \"designation\": \"Senior Developer\",\n    \"department\": \"Engineering\",\n    \"salary\": 80000,\n    \"role\": \"Employee\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -357,10 +516,30 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Delete Employee (Admin/HR)",
+                    "name": "Delete Employee (Admin)",
                     "request": {
                         "method": "DELETE",
                         "header": [],
@@ -373,15 +552,36 @@
                                 "employees",
                                 ":id"
                             ]
-                        }
+                        },
+                        "description": "Admin: Soft delete or remove an employee."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Employees"
+            "description": "Employee management endpoints."
         },
         {
-            "name": "Attendance",
+            "name": "3. Attendance",
             "item": [
                 {
                     "name": "Check In",
@@ -398,9 +598,10 @@
                                 "check-in"
                             ]
                         },
+                        "description": "Employee: Mark daily attendance check-in.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"location\": \"Office\",\n    \"coordinates\": {\n        \"lat\": 0,\n        \"lng\": 0\n    }\n}",
+                            "raw": "{\n    \"location\": \"Office Headquarters\",\n    \"coordinates\": {\n        \"lat\": 37.7749,\n        \"lng\": -122.4194\n    }\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -408,6 +609,26 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -424,48 +645,120 @@
                                 "attendance",
                                 "check-out"
                             ]
+                        },
+                        "description": "Employee: Mark daily attendance check-out.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"location\": \"Office Headquarters\",\n    \"coordinates\": {\n        \"lat\": 37.7749,\n        \"lng\": -122.4194\n    }\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "My Attendance",
+                    "name": "My Attendance History",
                     "request": {
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/attendance/my-attendance",
+                            "raw": "{{baseUrl}}/attendance/my-attendance?month=1&year=2024",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "attendance",
-                                "my-attendance"
+                                "my-attendance?month=1&year=2024"
                             ]
-                        }
+                        },
+                        "description": "Employee: View own attendance records."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "All Attendance (Admin/HR)",
+                    "name": "All Attendance Records (Admin)",
                     "request": {
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/attendance/all",
+                            "raw": "{{baseUrl}}/attendance/all?date=2024-01-03",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "attendance",
-                                "all"
+                                "all?date=2024-01-03"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: View attendance for a specific date or range."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Attendance Stats (Admin/HR)",
+                    "name": "Attendance Stats (Admin)",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -478,12 +771,33 @@
                                 "attendance",
                                 "stats"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: Get aggregated attendance statistics."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Mark Attendance (Admin/HR)",
+                    "name": "Mark Attendance Manually (Admin)",
                     "request": {
                         "method": "POST",
                         "header": [],
@@ -497,9 +811,10 @@
                                 "mark"
                             ]
                         },
+                        "description": "HR/Admin: Manually correct or add attendance record.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"employeeId\": \"emp_id_here\",\n    \"date\": \"2024-01-01\",\n    \"status\": \"present\"\n}",
+                            "raw": "{\n    \"employeeId\": \"INSERT_EMPLOYEE_ID_HERE\",\n    \"date\": \"2024-01-03\",\n    \"status\": \"Present\",\n    \"checkIn\": \"2024-01-03T09:00:00.000Z\",\n    \"checkOut\": \"2024-01-03T17:00:00.000Z\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -507,43 +822,36 @@
                             }
                         }
                     },
-                    "response": []
-                },
-                {
-                    "name": "Update Attendance (Admin/HR)",
-                    "request": {
-                        "method": "PUT",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/attendance/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "attendance",
-                                ":id"
-                            ]
-                        },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"status\": \"absent\"\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
                             }
                         }
-                    },
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Attendance"
+            "description": "Daily attendance tracking."
         },
         {
-            "name": "Leaves",
+            "name": "4. Leaves",
             "item": [
                 {
-                    "name": "Apply Leave",
+                    "name": "Apply for Leave",
                     "request": {
                         "method": "POST",
                         "header": [],
@@ -557,9 +865,10 @@
                                 "apply"
                             ]
                         },
+                        "description": "Employee: Submit a new leave request.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"type\": \"Sick Leave\",\n    \"startDate\": \"2024-01-10\",\n    \"endDate\": \"2024-01-11\",\n    \"reason\": \"Fever\"\n}",
+                            "raw": "{\n    \"type\": \"Sick\",\n    \"startDate\": \"2024-02-01\",\n    \"endDate\": \"2024-02-02\",\n    \"reason\": \"Medical emergency\",\n    \"isHalfDay\": false\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -567,6 +876,26 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -583,12 +912,33 @@
                                 "leaves",
                                 "my-leaves"
                             ]
-                        }
+                        },
+                        "description": "Employee: View leave history and status."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Leave Balance",
+                    "name": "Check Leave Balance",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -601,8 +951,29 @@
                                 "leaves",
                                 "balance"
                             ]
-                        }
+                        },
+                        "description": "Employee: Check remaining leave quota."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -620,48 +991,72 @@
                                 ":id",
                                 "cancel"
                             ]
-                        }
+                        },
+                        "description": "Employee: Cancel a pending leave request."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "All Leaves (Admin/HR)",
+                    "name": "All Leave Requests (Admin)",
                     "request": {
                         "method": "GET",
                         "header": [],
                         "url": {
-                            "raw": "{{baseUrl}}/leaves/all",
+                            "raw": "{{baseUrl}}/leaves/all?status=Pending",
                             "host": [
                                 "{{baseUrl}}"
                             ],
                             "path": [
                                 "leaves",
-                                "all"
+                                "all?status=Pending"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: details of all leave requests. Filter by status (Pending, Approved, Rejected)."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Leave Stats (Admin/HR)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/leaves/stats",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "leaves",
-                                "stats"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Approve Leave (Admin/HR)",
+                    "name": "Approve Leave (Admin)",
                     "request": {
                         "method": "PUT",
                         "header": [],
@@ -675,12 +1070,33 @@
                                 ":id",
                                 "approve"
                             ]
-                        }
+                        },
+                        "description": "HR/Admin: Approve a leave request."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Reject Leave (Admin/HR)",
+                    "name": "Reject Leave (Admin)",
                     "request": {
                         "method": "PUT",
                         "header": [],
@@ -695,9 +1111,10 @@
                                 "reject"
                             ]
                         },
+                        "description": "HR/Admin: Reject a leave request with a reason.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"reason\": \"Not enough balance\"\n}",
+                            "raw": "{\n    \"reason\": \"Critical project deadline, please reschedule.\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -705,16 +1122,36 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Leaves"
+            "description": "Leave management and approvals."
         },
         {
-            "name": "Payroll",
+            "name": "5. Payroll",
             "item": [
                 {
-                    "name": "My Payroll",
+                    "name": "My Payroll History",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -727,88 +1164,68 @@
                                 "payroll",
                                 "my-payroll"
                             ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "All Payrolls (Admin/HR)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/payroll/all",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "payroll",
-                                "all"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Payroll Stats (Admin/HR)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/payroll/stats",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "payroll",
-                                "stats"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Get Payroll By ID (Admin/HR)",
-                    "request": {
-                        "method": "GET",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/payroll/:id",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "payroll",
-                                ":id"
-                            ]
-                        }
-                    },
-                    "response": []
-                },
-                {
-                    "name": "Create/Update Payroll (Admin/HR)",
-                    "request": {
-                        "method": "POST",
-                        "header": [],
-                        "url": {
-                            "raw": "{{baseUrl}}/payroll",
-                            "host": [
-                                "{{baseUrl}}"
-                            ],
-                            "path": [
-                                "payroll"
-                            ]
                         },
-                        "body": {
-                            "mode": "raw",
-                            "raw": "{\n    \"employeeId\": \"emp_id_here\",\n    \"month\": 1,\n    \"year\": 2024,\n    \"basicSalary\": 5000\n}",
-                            "options": {
-                                "raw": {
-                                    "language": "json"
-                                }
+                        "description": "Employee: View salary slips/history."
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
                             }
                         }
+                    ],
+                    "response": []
+                },
+                {
+                    "name": "All Payrolls (Admin)",
+                    "request": {
+                        "method": "GET",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/payroll/all?month=1&year=2024",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payroll",
+                                "all?month=1&year=2024"
+                            ]
+                        },
+                        "description": "HR/Admin: View payrolls for a specific period."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -826,6 +1243,7 @@
                                 "generate"
                             ]
                         },
+                        "description": "Admin: Trigger batch payroll generation for all active employees for the specified month.",
                         "body": {
                             "mode": "raw",
                             "raw": "{\n    \"month\": 1,\n    \"year\": 2024\n}",
@@ -836,10 +1254,77 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Update Payment Status (Admin/HR)",
+                    "name": "Create/Update Individual Payroll (Admin)",
+                    "request": {
+                        "method": "POST",
+                        "header": [],
+                        "url": {
+                            "raw": "{{baseUrl}}/payroll",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "payroll"
+                            ]
+                        },
+                        "description": "HR/Admin: Manually create or adjust a specific payroll record.",
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n    \"employeeId\": \"INSERT_EMPLOYEE_ID_HERE\",\n    \"month\": 1,\n    \"year\": 2024,\n    \"basicSalary\": 5000,\n    \"hra\": 2000,\n    \"allowances\": 1000,\n    \"deductions\": 500\n}",
+                            "options": {
+                                "raw": {
+                                    "language": "json"
+                                }
+                            }
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
+                    "response": []
+                },
+                {
+                    "name": "Update Payment Status (Admin)",
                     "request": {
                         "method": "PUT",
                         "header": [],
@@ -854,9 +1339,10 @@
                                 "payment-status"
                             ]
                         },
+                        "description": "HR/Admin: Mark a payroll record as Paid.",
                         "body": {
                             "mode": "raw",
-                            "raw": "{\n    \"status\": \"Paid\"\n}",
+                            "raw": "{\n    \"status\": \"Paid\",\n    \"paymentMethod\": \"Bank Transfer\",\n    \"transactionId\": \"TXN123456789\"\n}",
                             "options": {
                                 "raw": {
                                     "language": "json"
@@ -864,16 +1350,36 @@
                             }
                         }
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Payroll"
+            "description": "Salary and payroll processing."
         },
         {
-            "name": "Dashboard",
+            "name": "6. Dashboard",
             "item": [
                 {
-                    "name": "Employee Dashboard",
+                    "name": "Employee Dashboard Stats",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -886,12 +1392,33 @@
                                 "dashboard",
                                 "employee"
                             ]
-                        }
+                        },
+                        "description": "Get summary stats for the employee home screen."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
-                    "name": "Admin Dashboard",
+                    "name": "Admin Dashboard Stats",
                     "request": {
                         "method": "GET",
                         "header": [],
@@ -904,8 +1431,29 @@
                                 "dashboard",
                                 "admin"
                             ]
-                        }
+                        },
+                        "description": "Get high-level company stats for the admin home screen."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 },
                 {
@@ -922,12 +1470,33 @@
                                 "dashboard",
                                 "activity"
                             ]
-                        }
+                        },
+                        "description": "Get recent system-wide activities."
                     },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "exec": [
+                                    "pm.test(\"Status code is 200/201\", function () {",
+                                    "    pm.expect(pm.response.code).to.be.oneOf([200, 201]);",
+                                    "});",
+                                    "",
+                                    "pm.test(\"Response has success true\", function () {",
+                                    "    var jsonData = pm.response.json();",
+                                    "    if (jsonData.success !== undefined) {",
+                                    "        pm.expect(jsonData.success).to.be.true;",
+                                    "    }",
+                                    "});"
+                                ],
+                                "type": "text/javascript"
+                            }
+                        }
+                    ],
                     "response": []
                 }
             ],
-            "description": "Endpoints for Dashboard"
+            "description": "Aggregated statistics for dashboards."
         }
     ]
 }

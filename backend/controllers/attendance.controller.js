@@ -314,7 +314,22 @@ const markAttendance = asyncHandler(async (req, res) => {
         return ApiResponse.error(res, 'Employee ID, date, and status are required', 400);
     }
 
-    const employee = await Employee.findById(employeeId);
+    let employee;
+    const mongoose = require('mongoose');
+
+    // Check if employeeId is a valid ObjectId (direct lookup)
+    if (mongoose.Types.ObjectId.isValid(employeeId)) {
+        employee = await Employee.findById(employeeId);
+    }
+
+    // If not found or not ObjectId, try lookup by custom employeeId string (e.g. EMP001) in User model
+    if (!employee) {
+        const User = require('../models/User.model');
+        const user = await User.findOne({ employeeId: employeeId });
+        if (user) {
+            employee = await Employee.findOne({ user: user._id });
+        }
+    }
 
     if (!employee) {
         return ApiResponse.notFound(res, 'Employee not found');
