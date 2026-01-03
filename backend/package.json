@@ -1,8 +1,21 @@
 {
+  "name": "dayflow-hrms-backend",
+  "version": "1.0.0",
+  "description": "Dayflow - Human Resource Management System Backend API",
+  "main": "server.js",
   "scripts": {
     "start": "node server.js",
     "dev": "nodemon server.js"
   },
+  "keywords": [
+    "hrms",
+    "hr",
+    "employee-management",
+    "attendance",
+    "payroll"
+  ],
+  "author": "Dayflow Team",
+  "license": "MIT",
   "dependencies": {
     "bcryptjs": "^3.0.3",
     "cloudinary": "^2.8.0",
@@ -29,5 +42,8 @@
   "devDependencies": {
     "eslint": "^9.39.2",
     "nodemon": "^3.1.11"
+  },
+  "engines": {
+    "node": ">=18.0.0"
   }
 }
